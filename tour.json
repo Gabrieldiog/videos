@@ -1,9 +1,10 @@
 {
   "formato": "16:9",
   "legendas": true,
-  "musica": null,
-  "volume_musica": 0.5,
-  "transicao_segundos": 0.6,
+  "musica": "chopin-noturno-op9-n2.mp3",
+  "inicio_musica": 1.1,
+  "volume_musica": 0.8,
+  "transicao_segundos": 1.0,
   "cenas": [
     {
       "foto": "sala.jpg",

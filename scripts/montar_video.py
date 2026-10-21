@@ -6,7 +6,7 @@
 - Transição em fade entre os ambientes
 - Nome do ambiente discreto no canto (desligue com "legendas": false)
 - Narração opcional por cena ("narracao" no tour.json), voz offline Piper
-- Música opcional (arquivo em musica/), que abaixa sozinha durante a narração
+- Música opcional (arquivo em musica/), com volume normalizado; abaixa sozinha durante a narração
 
 Uso:
     python scripts/montar_video.py
@@ -182,9 +182,11 @@ def main() -> None:
             if not musica.exists():
                 sys.exit(f"Música não encontrada: {musica}")
             cmd += ["-stream_loop", "-1", "-i", str(musica)]
-            volume = float(config.get("volume_musica", 0.5))
+            volume = float(config.get("volume_musica", 0.8))
+            inicio_musica = float(config.get("inicio_musica", 0))
             cadeia.append(
-                f"[{proxima_entrada}:a]aresample=48000,atrim=0:{total:.3f},volume={volume},"
+                f"[{proxima_entrada}:a]aresample=48000,atrim=start={inicio_musica:.3f}:end={inicio_musica + total:.3f},"
+                f"asetpts=PTS-STARTPTS,loudnorm=I=-18:TP=-2:LRA=11,aresample=48000,volume={volume},"
                 f"afade=t=in:d=1,afade=t=out:st={max(total - 2, 0):.3f}:d=2[mus]"
             )
             if falas:

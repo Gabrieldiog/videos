@@ -4,3 +4,4 @@ __pycache__/
 .DS_Store
 fotos/teste-*
 modelos-voz/
+musica/*.mp3

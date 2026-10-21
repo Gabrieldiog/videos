@@ -18,3 +18,10 @@ Não use Remotion/HyperFrames aqui.
   o movimento que menos deforma aquela foto e onde vale usar `foto_final` para ligar cômodos.
 - Rode Python com `.venv/bin/python -I`. O venv é criado pelo hook `.claude/hooks/setup.sh`.
 - Sempre confira os clipes gerados (extraia quadros com ffmpeg e olhe) antes de montar: a IA pode deformar paredes ou móveis.
+
+## Preferências do usuário (definidas após o 1º teste)
+- **Sem narração/voz.** Trilha: piano calmo em domínio público (`scripts/baixar_musicas.sh`, Chopin/Musopen CC0).
+  Padrão: `chopin-noturno-op9-n2.mp3` com `inicio_musica: 1.1`. A normalização de volume (loudnorm) ainda não foi testada.
+- **Transições sem cara de corte.** Encadeie as cenas com `foto_final` = foto da cena seguinte (a câmera "anda" de um
+  cômodo ao outro) e use fade longo (`transicao_segundos` ~1.0). Evite cortes secos entre ambientes.
+- Ideias pendentes: rodar 2 clipes em paralelo (o Kaggle dá 2× T4 e hoje usamos 1) e comparar LTX com Wan 2.2.
