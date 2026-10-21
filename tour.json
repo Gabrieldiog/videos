@@ -1,0 +1,28 @@
+{
+  "formato": "16:9",
+  "legendas": true,
+  "musica": null,
+  "volume_musica": 0.5,
+  "transicao_segundos": 0.6,
+  "cenas": [
+    {
+      "foto": "sala.jpg",
+      "ambiente": "Sala de estar",
+      "movimento": "avancar",
+      "segundos": 3.5
+    },
+    {
+      "foto": "sala.jpg",
+      "foto_final": "cozinha.jpg",
+      "ambiente": "Cozinha",
+      "movimento": "pan-direita",
+      "segundos": 3
+    },
+    {
+      "foto": "quarto.jpg",
+      "ambiente": "Suíte",
+      "movimento": "orbita-esquerda",
+      "segundos": 3.5
+    }
+  ]
+}
