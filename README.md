@@ -12,7 +12,23 @@ fotos/*.jpg ──► scripts/gerar_clipes.py ──► out/clipes/*.mp4 ──�
                                                                   nome do ambiente, música)
 ```
 
-## Preparar (uma vez)
+## Dois motores para gerar os clipes (ambos grátis)
+
+| Motor | Comando | Cota | Qualidade |
+|---|---|---|---|
+| **Kaggle** (recomendado) | `scripts/kaggle_gerar.py` | ~30 h de GPU por semana | Wan 2.2 14B (GGUF + LoRA de 4 passos), 480p ou 720p |
+| Hugging Face Spaces | `scripts/gerar_clipes.py` | ~5 min de GPU por dia | Wan 2.2 14B, 480p |
+
+### Kaggle
+1. Conta em https://www.kaggle.com com **celular verificado** (sem isso não libera GPU).
+2. Settings → API Tokens → **Generate New Token** → salve como variável `KAGGLE_API_TOKEN`
+   (ou no arquivo `~/.kaggle/access_token`).
+3. `.venv/bin/python scripts/kaggle_gerar.py` — sobe as fotos como dataset privado, roda
+   `kaggle/wan_i2v.py` num notebook privado com GPU T4 e baixa os clipes para `out/clipes/`.
+   Opções: `--resolucao 720`, `--cena N` (refaz uma cena com outra seed), `--quant Q5_K_M`.
+   Logs e tempos ficam em `out/kaggle/`.
+
+## Preparar o Hugging Face (opcional)
 
 1. Crie uma conta grátis em https://huggingface.co e gere um token do tipo **Read**
    em https://huggingface.co/settings/tokens
