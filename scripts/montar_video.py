@@ -5,7 +5,8 @@
 - Suaviza para 30 fps (os modelos de IA geram ~16 fps)
 - Transição em fade entre os ambientes
 - Nome do ambiente discreto no canto (desligue com "legendas": false)
-- Música opcional (arquivo em musica/)
+- Narração opcional por cena ("narracao" no tour.json), voz offline Piper
+- Música opcional (arquivo em musica/), que abaixa sozinha durante a narração
 
 Uso:
     python scripts/montar_video.py
@@ -23,6 +24,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from gerar_clipes import RAIZ, caminho_clipe, carregar_config  # noqa: E402
+from narracao import gerar_fala  # noqa: E402
 
 FPS = 30
 TAMANHOS = {"16:9": (1920, 1080), "9:16": (1080, 1920)}
@@ -44,6 +46,12 @@ def sondar(arquivo: Path) -> tuple[float, float]:
     dados = json.loads(saida)
     num, den = dados["streams"][0]["r_frame_rate"].split("/")
     return float(dados["format"]["duration"]), float(num) / float(den)
+
+
+def sondar_audio(arquivo: Path) -> float:
+    saida = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(arquivo)],
+                           capture_output=True, text=True, check=True).stdout
+    return float(saida)
 
 
 def fonte_padrao() -> str:
@@ -129,15 +137,46 @@ def main() -> None:
             entradas += ["-i", str(arquivo)]
 
         cadeia, ultimo, acumulado = [], "0:v", duracoes[0]
+        inicios = [0.0]
         for k in range(1, len(normalizados)):
             offset = acumulado - transicao
             rotulo = f"v{k}"
             cadeia.append(f"[{ultimo}][{k}:v]xfade=transition=fade:duration={transicao}:offset={offset:.3f}[{rotulo}]")
             ultimo, acumulado = rotulo, offset + duracoes[k]
+            inicios.append(offset)
         total = acumulado
 
         cmd = ["ffmpeg", "-y", "-loglevel", "error", *entradas]
-        mapa_audio: list[str] = []
+        proxima_entrada = len(normalizados)
+
+        # Narração: uma fala por cena, começando logo depois da transição.
+        falas = []
+        voz = config.get("voz", "faber")
+        for i, cena in enumerate(config["cenas"]):
+            if not cena.get("narracao"):
+                continue
+            wav = tmp / f"fala-{i + 1:02d}.wav"
+            print(f"[{i + 1}] narrando com a voz {voz}...", flush=True)
+            gerar_fala(cena["narracao"], voz, wav)
+            inicio = inicios[i] + (transicao if i else 0.3)
+            fim_cena = inicios[i + 1] if i + 1 < len(inicios) else total
+            sobra = fim_cena - inicio - sondar_audio(wav)
+            if sobra < 0:
+                print(f"    aviso: a fala da cena {i + 1} passa {-sobra:.1f}s do fim da cena; "
+                      f"encurte o texto ou aumente 'segundos'", flush=True)
+            cmd += ["-i", str(wav)]
+            falas.append((proxima_entrada, inicio))
+            proxima_entrada += 1
+
+        trilhas = []
+        if falas:
+            for n, (entrada, inicio) in enumerate(falas):
+                ms = int(inicio * 1000)
+                cadeia.append(f"[{entrada}:a]aresample=48000,adelay={ms}|{ms}[f{n}]")
+            juntas = "".join(f"[f{n}]" for n in range(len(falas)))
+            cadeia.append(f"{juntas}amix=inputs={len(falas)}:normalize=0,"
+                          f"volume={float(config.get('volume_narracao', 1.0))},apad[narr]")
+
         if config.get("musica"):
             musica = RAIZ / "musica" / config["musica"]
             if not musica.exists():
@@ -145,9 +184,25 @@ def main() -> None:
             cmd += ["-stream_loop", "-1", "-i", str(musica)]
             volume = float(config.get("volume_musica", 0.5))
             cadeia.append(
-                f"[{len(normalizados)}:a]atrim=0:{total:.3f},volume={volume},"
-                f"afade=t=in:d=1,afade=t=out:st={max(total - 2, 0):.3f}:d=2[a]"
+                f"[{proxima_entrada}:a]aresample=48000,atrim=0:{total:.3f},volume={volume},"
+                f"afade=t=in:d=1,afade=t=out:st={max(total - 2, 0):.3f}:d=2[mus]"
             )
+            if falas:
+                # Abaixa a música automaticamente enquanto a narração fala.
+                cadeia.append("[narr]asplit[narr1][narr2]")
+                cadeia.append("[mus][narr1]sidechaincompress=threshold=0.03:ratio=6:attack=50:release=600[musd]")
+                trilhas = ["[musd]", "[narr2]"]
+            else:
+                trilhas = ["[mus]"]
+        elif falas:
+            trilhas = ["[narr]"]
+
+        mapa_audio: list[str] = []
+        if trilhas:
+            if len(trilhas) > 1:
+                cadeia.append(f"{''.join(trilhas)}amix=inputs={len(trilhas)}:normalize=0:duration=first,alimiter=limit=0.8:level=false[a]")
+            else:
+                cadeia.append(f"{trilhas[0]}alimiter=limit=0.8:level=false[a]")
             mapa_audio = ["-map", "[a]", "-c:a", "aac", "-b:a", "192k"]
 
         mapa_video = ["-map", f"[{ultimo}]"] if len(normalizados) > 1 else ["-map", "0:v"]

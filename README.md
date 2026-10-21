@@ -16,7 +16,7 @@ fotos/*.jpg ──► scripts/gerar_clipes.py ──► out/clipes/*.mp4 ──�
 
 | Motor | Comando | Cota | Qualidade |
 |---|---|---|---|
-| **Kaggle** (recomendado) | `scripts/kaggle_gerar.py` | ~30 h de GPU por semana | Wan 2.2 14B (GGUF + LoRA de 4 passos), 480p ou 720p |
+| **Kaggle** (recomendado) | `scripts/kaggle_gerar.py` | ~30 h de GPU por semana | Wan 2.2 14B (GGUF + LoRA de 4 passos), 480p ou 720p. Medido na T4: ~10 min por clipe de 4 s (+ ~5 min na 1ª cena, carregando modelos) |
 | Hugging Face Spaces | `scripts/gerar_clipes.py` | ~5 min de GPU por dia | Wan 2.2 14B, 480p |
 
 ### Kaggle
@@ -55,9 +55,17 @@ fotos/*.jpg ──► scripts/gerar_clipes.py ──► out/clipes/*.mp4 ──�
 | `segundos`     | `3.5`               | Duração do clipe (os Spaces aceitam de 0,5 a 5 s) |
 | `prompt_extra` | `"curtains move gently in the breeze"` | *(opcional)* Instrução extra em inglês para a IA |
 | `seed`         | `1234`              | *(opcional)* Fixa a variação; sem ela cada geração sai diferente |
+| `narracao`     | `"Sala ampla e iluminada."` | *(opcional)* Fala desta cena, em português (voz offline Piper) |
 
 Opções gerais: `formato` (`"16:9"` ou `"9:16"`), `legendas` (true/false),
-`musica` (arquivo em `musica/`, ou `null`), `volume_musica`, `transicao_segundos`.
+`musica` (arquivo em `musica/`, ou `null`), `volume_musica`, `transicao_segundos`,
+`voz` (`faber`, `cadu` ou `jeff` — vozes masculinas pt-BR do Piper), `volume_narracao`.
+Com narração e música juntas, a música abaixa sozinha enquanto a voz fala.
+
+### Conferir antes de montar
+
+`.venv/bin/python scripts/storyboard.py` gera `out/storyboard.jpg` com início, meio e fim de
+cada clipe — para pegar deformações da IA e para o cliente aprovar as cenas.
 
 ### Dicas
 

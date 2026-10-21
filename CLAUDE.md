@@ -12,6 +12,8 @@ Não use Remotion/HyperFrames aqui.
   Usa os mesmos nomes de clipe que `gerar_clipes.py`, então `montar_video.py` funciona com os dois.
 - `scripts/montar_video.py` — ffmpeg: interpola para 30 fps, escala para 1920x1080 ou 1080x1920, fade entre clipes,
   nome do ambiente, música opcional.
+- `scripts/narracao.py` — Piper TTS offline (vozes pt-BR faber/cadu/jeff, baixadas para `modelos-voz/`). `scripts/storyboard.py` — folha de
+  aprovação com 3 quadros por clipe; use-a para conferir os clipes antes de montar.
 - `tour.json` — roteiro do vídeo. Ao receber a ideia + fotos do usuário: olhe cada foto, escolha a ordem do passeio,
   o movimento que menos deforma aquela foto e onde vale usar `foto_final` para ligar cômodos.
 - Rode Python com `.venv/bin/python -I`. O venv é criado pelo hook `.claude/hooks/setup.sh`.
