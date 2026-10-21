@@ -1,7 +1,8 @@
 # Projeto: tour realista de apartamento a partir de fotos
 
-O usuário quer vídeos **realistas** (câmera se movendo pelo imóvel), não motion graphics.
-Não use Remotion/HyperFrames aqui.
+O usuário quer vídeos **realistas** (câmera se movendo pelo imóvel). A filmagem vem sempre dos clipes de IA;
+motion graphics só como **camada por cima** (textos, nota, avaliações, chamada final), feita com **HyperFrames**
+(skills em `.claude/skills/hyperframes*`, CLI `npx hyperframes@0.8.185`, projetos em `motion/<tour>/`). Não use Remotion.
 
 - `scripts/gerar_clipes.py` — chama Wan 2.2 em Spaces do Hugging Face (ZeroGPU) via `gradio_client`.
   Precisa de `HF_TOKEN`. Foto única → `zerogpu-aoti/wan2-2-fp8da-aoti-faster`;

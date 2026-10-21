@@ -52,12 +52,17 @@ def usuario() -> str:
     return api.get_config_value("username")
 
 
+def nome_no_dataset(foto: str | None) -> str | None:
+    """O CLI do Kaggle ignora subpastas no dataset, então achatamos o caminho."""
+    return foto.replace("/", "__") if foto else None
+
+
 def subir_dataset(user: str, jobs: dict, fotos: set[str]) -> None:
     ident = f"{user}/{DATASET_SLUG}"
     with tempfile.TemporaryDirectory() as tmp:
         pasta = Path(tmp)
         for foto in fotos:
-            shutil.copy(RAIZ / "fotos" / foto, pasta / foto)
+            shutil.copy(RAIZ / "fotos" / foto, pasta / nome_no_dataset(foto))
         (pasta / "jobs.json").write_text(json.dumps(jobs, indent=2, ensure_ascii=False))
         (pasta / "dataset-metadata.json").write_text(json.dumps(
             {"title": DATASET_SLUG, "id": ident, "licenses": [{"name": "CC0-1.0"}]}))
@@ -121,7 +126,7 @@ def main() -> None:
                     sys.exit(f"Foto não encontrada: fotos/{cena[chave]}")
                 fotos.add(cena[chave])
         jobs.append({
-            "nome": destino.stem, "foto": cena["foto"], "foto_final": cena.get("foto_final"),
+            "nome": destino.stem, "foto": nome_no_dataset(cena["foto"]), "foto_final": nome_no_dataset(cena.get("foto_final")),
             "prompt": montar_prompt(cena), "negativo": NEGATIVO,
             "segundos": float(cena.get("segundos", 3.5)),
             "seed": int(cena["seed"]) if "seed" in cena and not args.cena else random.randint(1, 2**31 - 1),

@@ -5,3 +5,4 @@ __pycache__/
 fotos/teste-*
 modelos-voz/
 musica/*.mp3
+fotos/*/

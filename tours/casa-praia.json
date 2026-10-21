@@ -1,0 +1,27 @@
+{
+  "formato": "9:16",
+  "legendas": false,
+  "musica": "chopin-noturno-op9-n2.mp3",
+  "inicio_musica": 1.1,
+  "volume_musica": 0.8,
+  "transicao_segundos": 1.0,
+  "cenas": [
+    {"foto": "casa-praia/piscina.png", "ambiente": "Área da piscina", "movimento": "avancar", "segundos": 5,
+     "prompt_extra": "Sunny day, palm trees sway gently in the breeze, the pool water ripples softly."},
+    {"foto": "casa-praia/sala-entrada.png", "foto_final": "casa-praia/sala-jantar.png", "ambiente": "Sala integrada",
+     "movimento": "caminhar", "segundos": 5,
+     "prompt_extra": "The camera enters the living room, passes the sofa and turns right toward the dining table and the open glass door."},
+    {"foto": "casa-praia/sala-jantar.png", "foto_final": "casa-praia/varanda.png", "ambiente": "Varanda gourmet",
+     "movimento": "caminhar", "segundos": 5,
+     "prompt_extra": "The camera walks past the dining table and out through the open door onto the covered veranda."},
+    {"foto": "casa-praia/varanda.png", "ambiente": "Varanda com vista", "movimento": "avancar", "segundos": 4,
+     "prompt_extra": "The camera moves along the wooden table toward the garden and the palm tree, sea in the background."},
+    {"foto": "casa-praia/sala-intima.png", "ambiente": "Sala íntima", "movimento": "avancar", "segundos": 4},
+    {"foto": "casa-praia/quarto.png", "ambiente": "Quarto", "movimento": "pan-direita", "segundos": 4,
+     "prompt_extra": "The ceiling fan blades rotate slowly."},
+    {"foto": "casa-praia/suite.png", "ambiente": "Suíte", "movimento": "avancar", "segundos": 4,
+     "prompt_extra": "The ceiling fan blades rotate slowly."},
+    {"foto": "casa-praia/piscina.png", "ambiente": "Encerramento", "movimento": "recuar", "segundos": 5,
+     "prompt_extra": "Sunny day, palm trees sway gently, the pool water ripples softly."}
+  ]
+}

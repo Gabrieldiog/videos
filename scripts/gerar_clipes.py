@@ -44,9 +44,9 @@ MOVIMENTOS = {
 }
 
 PROMPT_BASE = (
-    "Real estate video tour of an apartment interior, {movimento}. "
+    "Real estate video tour of a vacation home, {movimento}. "
     "Smooth steady gimbal shot at constant slow speed. "
-    "Walls, windows, floor and furniture stay exactly the same and keep their shape. "
+    "Walls, windows, floor, furniture and plants stay exactly the same and keep their shape. "
     "No people. Photorealistic, natural daylight, sharp details."
 )
 
