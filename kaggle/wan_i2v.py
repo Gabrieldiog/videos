@@ -49,7 +49,7 @@ def instalar() -> None:
     sh(f"git clone -q https://github.com/city96/ComfyUI-GGUF {nodes} && git -C {nodes} checkout -q {GGUF_NODES_COMMIT}")
     # Mantém o torch do Kaggle (já compilado para a GPU da máquina).
     reqs = [l for l in (COMFY / "requirements.txt").read_text().splitlines()
-            if l.strip() and not l.startswith("#") and not l.startswith("torch")]
+            if l.strip() and not l.startswith("#") and l.strip() not in ("torch", "torchvision", "torchaudio")]
     (COMFY / "req-kaggle.txt").write_text("\n".join(reqs + ["gguf", "imageio-ffmpeg"]))
     sh(f"{sys.executable} -m pip install -q -r {COMFY / 'req-kaggle.txt'}")
 
