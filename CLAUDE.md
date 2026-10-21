@@ -24,4 +24,4 @@ Não use Remotion/HyperFrames aqui.
   Padrão: `chopin-noturno-op9-n2.mp3` com `inicio_musica: 1.1`. A normalização de volume (loudnorm) ainda não foi testada.
 - **Transições sem cara de corte.** Encadeie as cenas com `foto_final` = foto da cena seguinte (a câmera "anda" de um
   cômodo ao outro) e use fade longo (`transicao_segundos` ~1.0). Evite cortes secos entre ambientes.
-- Ideias pendentes: rodar 2 clipes em paralelo (o Kaggle dá 2× T4 e hoje usamos 1) e comparar LTX com Wan 2.2.
+- Modelo decidido: manter Wan 2.2 (o usuário dispensou testar LTX). Ideia pendente: rodar 2 clipes em paralelo (o Kaggle dá 2× T4 e hoje usamos 1).
