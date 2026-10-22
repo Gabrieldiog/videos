@@ -6,9 +6,11 @@ dataset de entrada e salva um .mp4 por cena em /kaggle/working/clipes/.
 
 import glob
 import json
+import queue
 import shutil
 import subprocess
 import sys
+import threading
 import time
 import traceback
 import urllib.request
@@ -21,7 +23,7 @@ GGUF_NODES_COMMIT = "6ea2651e7df66d7585f6ffee804b20e92fb38b8a"
 COMFY = Path("/tmp/ComfyUI")
 MODELOS = Path("/tmp/modelos")
 SAIDA = Path("/kaggle/working")
-URL = "http://127.0.0.1:8188"
+PORTA_BASE = 8188
 FPS_WAN = 16
 
 T0 = time.time()
@@ -81,26 +83,39 @@ def baixar_modelos(quant: str) -> None:
             log(f"  ok {nome}")
 
 
-def iniciar_comfy() -> subprocess.Popen:
-    saida_log = open(SAIDA / "comfyui.log", "w")
+def contar_gpus() -> int:
+    r = subprocess.run(["nvidia-smi", "-L"], capture_output=True, text=True)
+    return max(1, sum(1 for l in r.stdout.splitlines() if l.startswith("GPU ")))
+
+
+def iniciar_comfy(gpu: int, varias: bool) -> tuple[subprocess.Popen, str] | None:
+    """Um ComfyUI por GPU. Com mais de uma, desliga a memória fixa para caber na RAM do Kaggle."""
+    porta = PORTA_BASE + gpu
+    saida_log = open(SAIDA / f"comfyui-{gpu}.log", "w")
+    extras = ["--disable-pinned-memory"] if varias else []
     proc = subprocess.Popen(
-        [sys.executable, "main.py", "--listen", "127.0.0.1", "--port", "8188", "--disable-auto-launch"],
+        [sys.executable, "main.py", "--listen", "127.0.0.1", "--port", str(porta), "--disable-auto-launch",
+         "--cuda-device", str(gpu), *extras],
         cwd=COMFY, stdout=saida_log, stderr=subprocess.STDOUT,
     )
+    url = f"http://127.0.0.1:{porta}"
     for _ in range(300):
         try:
-            urllib.request.urlopen(f"{URL}/system_stats", timeout=5)
-            log("ComfyUI no ar")
-            return proc
+            urllib.request.urlopen(f"{url}/system_stats", timeout=5)
+            log(f"ComfyUI no ar na GPU {gpu}")
+            return proc, url
         except Exception:
             if proc.poll() is not None:
-                sys.exit("ComfyUI morreu ao iniciar; veja comfyui.log")
+                log(f"ComfyUI da GPU {gpu} morreu ao iniciar; veja comfyui-{gpu}.log")
+                return None
             time.sleep(2)
-    sys.exit("ComfyUI não respondeu")
+    proc.terminate()
+    log(f"ComfyUI da GPU {gpu} não respondeu")
+    return None
 
 
-def api(caminho: str, dados: dict | None = None) -> dict:
-    req = urllib.request.Request(f"{URL}{caminho}")
+def api(url: str, caminho: str, dados: dict | None = None) -> dict:
+    req = urllib.request.Request(f"{url}{caminho}")
     if dados is not None:
         req.data = json.dumps(dados).encode()
         req.add_header("Content-Type", "application/json")
@@ -165,7 +180,7 @@ def grafo(job: dict, foto: str, foto_final: str | None, w: int, h: int, quadros:
     return g
 
 
-def gerar(job: dict, entrada: Path, lado_maior: int) -> dict:
+def gerar(job: dict, entrada: Path, lado_maior: int, url: str) -> dict:
     nome = job["nome"]
     w, h = preparar_foto(entrada / job["foto"], f"{nome}-a.jpg", lado_maior)
     foto_final = None
@@ -175,11 +190,11 @@ def gerar(job: dict, entrada: Path, lado_maior: int) -> dict:
     quadros = max(9, min(81, round(job["segundos"] * FPS_WAN / 4) * 4 + 1))
 
     inicio = time.time()
-    resp = api("/prompt", {"prompt": grafo(job, f"{nome}-a.jpg", foto_final, w, h, quadros, job["seed"]),
+    resp = api(url, "/prompt", {"prompt": grafo(job, f"{nome}-a.jpg", foto_final, w, h, quadros, job["seed"]),
                            "client_id": str(uuid.uuid4())})
     pid = resp["prompt_id"]
     while True:
-        hist = api(f"/history/{pid}")
+        hist = api(url, f"/history/{pid}")
         if pid in hist:
             status = hist[pid].get("status", {})
             if status.get("status_str") == "error":
@@ -211,23 +226,56 @@ def main() -> None:
 
     instalar()
     baixar_modelos(quant)
-    proc = iniciar_comfy()
+    gpus = min(int(config.get("gpus", 2)), contar_gpus(), len(config["jobs"]))
+    servidores = [(g, *s) for g in range(gpus) if (s := iniciar_comfy(g, gpus > 1))]
+    if not servidores:
+        sys.exit("Nenhum ComfyUI subiu; veja comfyui-*.log")
 
-    relatorio = {"quant": quant, "lado_maior": lado_maior, "clipes": []}
+    relatorio = {"quant": quant, "lado_maior": lado_maior, "gpus": len(servidores), "clipes": []}
+    fila: queue.Queue = queue.Queue()
     for job in config["jobs"]:
         job["_high"] = f"Wan2.2-I2V-A14B-HighNoise-{quant}.gguf"
         job["_low"] = f"Wan2.2-I2V-A14B-LowNoise-{quant}.gguf"
-        log(f"gerando {job['nome']} ({job['foto']}{' -> ' + job['foto_final'] if job.get('foto_final') else ''})")
-        try:
-            r = gerar(job, entrada, lado_maior)
-            log(f"  ok em {r['segundos_gpu']}s ({r['resolucao']}, {r['quadros']} quadros)")
-        except Exception as e:
-            traceback.print_exc()
-            r = {"nome": job["nome"], "ok": False, "erro": str(e)[:3000]}
-        relatorio["clipes"].append(r)
-        (SAIDA / "relatorio.json").write_text(json.dumps(relatorio, indent=2, ensure_ascii=False))
+        fila.put(job)
+    trava = threading.Lock()
 
-    proc.terminate()
+    def registrar(r: dict) -> None:
+        with trava:
+            relatorio["clipes"].append(r)
+            (SAIDA / "relatorio.json").write_text(json.dumps(relatorio, indent=2, ensure_ascii=False))
+
+    def trabalhador(gpu: int, proc: subprocess.Popen, url: str) -> None:
+        while True:
+            try:
+                job = fila.get_nowait()
+            except queue.Empty:
+                return
+            log(f"[GPU {gpu}] gerando {job['nome']} ({job['foto']}"
+                f"{' -> ' + job['foto_final'] if job.get('foto_final') else ''})")
+            try:
+                r = gerar(job, entrada, lado_maior, url)
+                r["gpu"] = gpu
+                log(f"[GPU {gpu}]   ok em {r['segundos_gpu']}s ({r['resolucao']}, {r['quadros']} quadros)")
+            except Exception as e:
+                if proc.poll() is not None:
+                    # O servidor desta GPU caiu (ex.: falta de RAM): devolve o clipe para a outra GPU.
+                    log(f"[GPU {gpu}] ComfyUI caiu; devolvendo {job['nome']} para a fila")
+                    fila.put(job)
+                    return
+                traceback.print_exc()
+                r = {"nome": job["nome"], "ok": False, "erro": str(e)[:3000], "gpu": gpu}
+            registrar(r)
+
+    threads = [threading.Thread(target=trabalhador, args=s) for s in servidores]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    while not fila.empty():
+        registrar({"nome": fila.get()["nome"], "ok": False, "erro": "nenhuma GPU disponível (todos os ComfyUI caíram)"})
+
+    for _, proc, _ in servidores:
+        proc.terminate()
     relatorio["segundos_total"] = round(time.time() - T0, 1)
     (SAIDA / "relatorio.json").write_text(json.dumps(relatorio, indent=2, ensure_ascii=False))
     shutil.rmtree(MODELOS, ignore_errors=True)

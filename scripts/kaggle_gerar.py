@@ -108,6 +108,7 @@ def main() -> None:
     parser.add_argument("--cena", type=int, action="append", help="número da cena (1, 2, ...) para refazer")
     parser.add_argument("--resolucao", type=int, choices=[480, 720], default=480)
     parser.add_argument("--quant", default="Q4_K_M", help="Q4_K_M (padrão), Q5_K_M ou Q6_K")
+    parser.add_argument("--gpus", type=int, choices=[1, 2], default=2, help="GPUs em paralelo no Kaggle (padrão 2)")
     args = parser.parse_args()
 
     config = carregar_config(RAIZ / args.config)
@@ -137,16 +138,16 @@ def main() -> None:
 
     user = usuario()
     print(f"conta Kaggle: {user} — {len(jobs)} clipe(s) para gerar")
-    subir_dataset(user, {"quant": args.quant, "resolucao": args.resolucao, "jobs": jobs}, fotos)
+    subir_dataset(user, {"quant": args.quant, "resolucao": args.resolucao, "gpus": args.gpus, "jobs": jobs}, fotos)
     status = rodar_kernel(user)
 
     with tempfile.TemporaryDirectory() as tmp:
         kaggle("kernels", "output", f"{user}/{KERNEL_SLUG}", "-p", tmp, "-o", check=False)
         saida = Path(tmp)
-        for log in ("relatorio.json", "comfyui.log", f"{KERNEL_SLUG}.log"):
-            if (saida / log).exists():
-                (RAIZ / "out" / "kaggle").mkdir(parents=True, exist_ok=True)
-                shutil.copy(saida / log, RAIZ / "out" / "kaggle" / log)
+        (RAIZ / "out" / "kaggle").mkdir(parents=True, exist_ok=True)
+        for log in [saida / "relatorio.json", saida / f"{KERNEL_SLUG}.log", *saida.glob("comfyui*.log")]:
+            if log.exists():
+                shutil.copy(log, RAIZ / "out" / "kaggle" / log.name)
         pasta_clipes.mkdir(parents=True, exist_ok=True)
         for clipe in (saida / "clipes").glob("*.mp4") if (saida / "clipes").exists() else []:
             shutil.copy(clipe, pasta_clipes / clipe.name)
