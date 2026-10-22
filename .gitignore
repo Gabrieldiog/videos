@@ -6,3 +6,6 @@ fotos/teste-*
 modelos-voz/
 musica/*.mp3
 fotos/*/
+motion/*/assets/clips/
+motion/*/assets/audio/
+motion/*/.hyperframes/

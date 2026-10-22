@@ -1,0 +1,184 @@
+<template>
+  <style>
+    #root {
+      position: absolute;
+      inset: 0;
+    }
+    #final-v {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1080px;
+      height: 1920px;
+      object-fit: cover;
+    }
+    /* Tinta verde em multiply: escurece a piscina em volta, e o branco dos números deixa a piscina aparecer limpa por dentro. */
+    #final-tinta {
+      position: absolute;
+      inset: 0;
+      background: #1e3d38;
+      mix-blend-mode: multiply;
+    }
+    /* Clareia a filmagem só dentro dos números, para a nota saltar sobre fachadas escuras. */
+    #final-brilho {
+      position: absolute;
+      inset: 0;
+      mix-blend-mode: screen;
+    }
+    #final-num-brilho {
+      color: rgba(255, 255, 255, 0.42);
+    }
+    #final-chao {
+      position: absolute;
+      inset: 0;
+      background: #1e3d38;
+    }
+    .num {
+      position: absolute;
+      left: 84px;
+      top: 470px;
+      font-family: "Playfair Display";
+      font-weight: 700;
+      font-size: 380px;
+      line-height: 1;
+      letter-spacing: -0.03em;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    #final-num-vazado {
+      color: #ffffff;
+    }
+    #final-grupo {
+      position: absolute;
+      inset: 0;
+      transform-origin: 108px 470px;
+    }
+    #final-num-solido {
+      color: #e9d3b0;
+    }
+    #final-estrelas {
+      position: absolute;
+      left: 108px;
+      top: 900px;
+      display: flex;
+      gap: 14px;
+    }
+    .estrela {
+      width: 66px;
+      height: 66px;
+    }
+    #final-aval {
+      position: absolute;
+      left: 108px;
+      top: 1000px;
+      font-family: "Montserrat";
+      font-weight: 600;
+      font-size: 48px;
+      color: #ffffff;
+    }
+    .card {
+      position: absolute;
+      left: 108px;
+      width: 864px;
+      color: #ffffff;
+    }
+    #final-nome {
+      top: 860px;
+      font-family: "Playfair Display";
+      font-weight: 700;
+      font-size: 96px;
+      line-height: 1.05;
+    }
+    #final-local {
+      top: 990px;
+      font-family: "Montserrat";
+      font-weight: 500;
+      font-size: 42px;
+      color: #e9d3b0;
+    }
+    #final-cta {
+      top: 1130px;
+      font-family: "Montserrat";
+      font-weight: 600;
+      font-size: 56px;
+    }
+    #final-cta-regua {
+      position: absolute;
+      left: 108px;
+      top: 1212px;
+      width: 560px;
+      height: 5px;
+      background: #e9d3b0;
+      transform-origin: left center;
+    }
+  </style>
+  <div
+    id="root"
+    data-composition-id="final"
+    data-width="1080"
+    data-height="1920"
+    data-composition-variables='[
+      {"id":"nota","type":"string","label":"Nota no Airbnb","default":"4,97"},
+      {"id":"avaliacoes","type":"string","label":"Linha de avaliações","default":"103 avaliações no Airbnb"},
+      {"id":"nome","type":"string","label":"Nome do anúncio","default":"Casa de Praia"},
+      {"id":"local","type":"string","label":"Cidade","default":"Cidade · UF"},
+      {"id":"cta","type":"string","label":"Chamada","default":"Reserve no Airbnb →"}
+    ]'
+  >
+    <video id="final-v" class="clip" src="assets/clips/08.mp4" muted playsinline
+      data-start="0" data-duration="7.8" data-media-start="1.1" data-playback-rate="0.5"></video>
+    <div id="final-tinta"><div id="final-num-vazado" class="num" data-layout-allow-overlap>0,00</div></div>
+    <div id="final-brilho"><div id="final-num-brilho" class="num" data-layout-allow-overlap>0,00</div></div>
+    <div id="final-chao"></div>
+    <div id="final-grupo">
+      <div id="final-num-solido" class="num" data-layout-allow-overlap>0,00</div>
+      <div id="final-estrelas">
+        <svg class="estrela" viewBox="0 0 24 24"><path fill="#E9D3B0" d="M12 1.8l3.1 6.6 7.2.9-5.3 5 1.4 7.1L12 17.9l-6.4 3.5L7 14.3 1.7 9.3l7.2-.9z" /></svg>
+        <svg class="estrela" viewBox="0 0 24 24"><path fill="#E9D3B0" d="M12 1.8l3.1 6.6 7.2.9-5.3 5 1.4 7.1L12 17.9l-6.4 3.5L7 14.3 1.7 9.3l7.2-.9z" /></svg>
+        <svg class="estrela" viewBox="0 0 24 24"><path fill="#E9D3B0" d="M12 1.8l3.1 6.6 7.2.9-5.3 5 1.4 7.1L12 17.9l-6.4 3.5L7 14.3 1.7 9.3l7.2-.9z" /></svg>
+        <svg class="estrela" viewBox="0 0 24 24"><path fill="#E9D3B0" d="M12 1.8l3.1 6.6 7.2.9-5.3 5 1.4 7.1L12 17.9l-6.4 3.5L7 14.3 1.7 9.3l7.2-.9z" /></svg>
+        <svg class="estrela" viewBox="0 0 24 24"><path fill="#E9D3B0" d="M12 1.8l3.1 6.6 7.2.9-5.3 5 1.4 7.1L12 17.9l-6.4 3.5L7 14.3 1.7 9.3l7.2-.9z" /></svg>
+      </div>
+      <div id="final-aval" data-var-text="avaliacoes">103 avaliações no Airbnb</div>
+    </div>
+    <div id="final-nome" class="card" data-var-text="nome">Casa de Praia</div>
+    <div id="final-local" class="card" data-var-text="local">Cidade · UF</div>
+    <div id="final-cta" class="card" data-var-text="cta">Reserve no Airbnb →</div>
+    <div id="final-cta-regua"></div>
+  </div>
+  <script>
+    const vars = (window.__hyperframes && window.__hyperframes.getVariables && window.__hyperframes.getVariables()) || {};
+    const notaTxt = String(vars.nota || "4,97");
+    const notaNum = parseFloat(notaTxt.replace(",", ".")) || 0;
+    const casas = (notaTxt.split(",")[1] || "").length;
+    const vazado = document.querySelector("#final-num-vazado");
+    const solido = document.querySelector("#final-num-solido");
+    const brilho = document.querySelector("#final-num-brilho");
+    const contador = { v: 0 };
+    const escrever = () => {
+      const t = contador.v.toFixed(casas).replace(".", ",");
+      vazado.textContent = t;
+      solido.textContent = t;
+      brilho.textContent = t;
+    };
+
+    const tl = gsap.timeline({ paused: true });
+    // 1. A tinta verde entra e a nota conta de 0 até a nota real, com a piscina dentro dos números.
+    tl.fromTo("#final-tinta", { opacity: 0 }, { opacity: 0.92, duration: 0.6, ease: "power2.inOut" }, 0);
+    tl.fromTo("#final-brilho", { opacity: 0 }, { opacity: 1, duration: 0.6, ease: "power2.inOut" }, 0);
+    tl.fromTo(contador, { v: 0 }, { v: notaNum, duration: 1.4, ease: "power3.out", onUpdate: escrever, onComplete: escrever }, 0.1);
+    // 2. Estrelas, uma a uma, e a linha de avaliações.
+    tl.fromTo(".estrela", { opacity: 0 }, { opacity: 1, duration: 0.1, ease: "none", stagger: 0.08 }, 1.45);
+    tl.fromTo(".estrela", { scale: 0.6 }, { scale: 1, duration: 0.45, ease: "back.out(1.4)", stagger: 0.08 }, 1.45);
+    tl.fromTo("#final-aval", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 1.95);
+    // 3. O verde inunda a tela e a nota fica sólida em areia.
+    tl.fromTo("#final-chao", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.inOut" }, 4.2);
+    tl.fromTo("#final-num-solido", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.inOut" }, 4.2);
+    // 4. A nota sobe e encolhe; entra o cartão com nome, cidade e chamada.
+    tl.fromTo("#final-grupo", { scale: 1, y: 0 }, { scale: 0.6, y: -150, duration: 0.6, ease: "power3.inOut" }, 4.65);
+    tl.fromTo("#final-nome", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 5.1);
+    tl.fromTo("#final-local", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "power4.out" }, 5.3);
+    tl.fromTo("#final-cta", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "power4.out" }, 5.55);
+    tl.fromTo("#final-cta-regua", { scaleX: 0 }, { scaleX: 1, duration: 0.45, ease: "expo.out" }, 5.6);
+    window.__timelines["final"] = tl;
+  </script>
+</template>

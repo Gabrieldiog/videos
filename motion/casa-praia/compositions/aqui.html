@@ -1,0 +1,50 @@
+<template>
+  <style>
+    #root {
+      position: absolute;
+      inset: 0;
+    }
+    .scrim {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1080px;
+      height: 1100px;
+      background: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0));
+    }
+    .frase {
+      position: absolute;
+      left: 108px;
+      top: 560px;
+      font-family: "Playfair Display";
+      font-weight: 700;
+      font-size: 150px;
+      line-height: 1.05;
+      letter-spacing: -0.015em;
+      color: #fff;
+      text-shadow: 0 2px 24px rgba(0, 0, 0, 0.35);
+    }
+    .p {
+      display: inline-block;
+    }
+  </style>
+  <div id="root" data-composition-id="aqui" data-width="1080" data-height="1920">
+    <div id="aqui-scrim" class="scrim"></div>
+    <div id="aqui-frase" class="frase">
+      <span class="p">Então</span> <span class="p">é</span><br /><span class="p">aqui.</span>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#aqui-scrim", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 0);
+    // Palavra por palavra, do cinza claro ao branco, sem mudar de posição.
+    tl.fromTo(
+      "#aqui-frase .p",
+      { opacity: 0, color: "#b9b9b9" },
+      { opacity: 1, color: "#ffffff", duration: 0.22, ease: "power2.out", stagger: 0.09 },
+      0.1,
+    );
+    tl.to("#aqui-frase .p", { opacity: 0, filter: "blur(8px)", duration: 0.16, ease: "power2.in", stagger: 0.03 }, 1.62);
+    window.__timelines["aqui"] = tl;
+  </script>
+</template>

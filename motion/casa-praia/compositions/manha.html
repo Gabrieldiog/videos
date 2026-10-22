@@ -1,0 +1,68 @@
+<template>
+  <style>
+    #root {
+      position: absolute;
+      inset: 0;
+    }
+    .scrim {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1080px;
+      height: 900px;
+      background: linear-gradient(rgba(0, 0, 0, 0.42), rgba(0, 0, 0, 0));
+    }
+    .bloco {
+      position: absolute;
+      left: 108px;
+      top: 330px;
+      color: #fff;
+      text-shadow: 0 2px 24px rgba(0, 0, 0, 0.35);
+    }
+    .hora {
+      font-family: "Playfair Display";
+      font-weight: 500;
+      font-size: 168px;
+      line-height: 1;
+      letter-spacing: -0.02em;
+    }
+    .regua {
+      width: 120px;
+      height: 5px;
+      margin: 28px 0 26px;
+      background: #e9d3b0;
+      transform-origin: left center;
+    }
+    .legenda {
+      font-family: "Montserrat";
+      font-weight: 500;
+      font-size: 48px;
+      line-height: 1.2;
+    }
+  </style>
+  <div
+    id="root"
+    data-composition-id="manha"
+    data-width="1080"
+    data-height="1920"
+    data-composition-variables='[{"id":"hora","type":"string","label":"Horário","default":"08:00"},{"id":"legenda","type":"string","label":"Legenda","default":"café da manhã na varanda"}]'
+  >
+    <div id="manha-scrim" class="scrim"></div>
+    <div class="bloco">
+      <div id="manha-hora" class="hora" data-var-text="hora">08:00</div>
+      <div id="manha-regua" class="regua"></div>
+      <div id="manha-legenda" class="legenda" data-var-text="legenda">café da manhã na varanda</div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    const fim = 3.3;
+    tl.fromTo("#manha-scrim", { opacity: 0 }, { opacity: 1, duration: 0.25, ease: "power2.out" }, 0);
+    tl.fromTo("#manha-hora", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 0.05);
+    tl.fromTo("#manha-regua", { scaleX: 0 }, { scaleX: 1, duration: 0.4, ease: "expo.out" }, 0.2);
+    tl.fromTo("#manha-legenda", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "power4.out" }, 0.38);
+    tl.to("#manha-hora, #manha-regua, #manha-legenda", { opacity: 0, filter: "blur(8px)", duration: 0.18, ease: "power2.in", stagger: 0.04 }, fim - 0.32);
+    tl.to("#manha-scrim", { opacity: 0, duration: 0.22, ease: "power2.in" }, fim - 0.25);
+    window.__timelines["manha"] = tl;
+  </script>
+</template>
